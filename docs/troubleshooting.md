@@ -1,5 +1,22 @@
 # 常见问题
 
+## `pnpm` 或 `corepack` 找不到
+
+请确认终端当前路径是项目文件夹，并先运行：
+
+```powershell
+corepack enable
+```
+
+如果仍提示找不到 `corepack`，可以直接安装 pnpm：
+
+```powershell
+npm install --global pnpm
+pnpm --version
+```
+
+看到版本号后，再运行 `pnpm install` 和 `pnpm dev`。安装 Node.js 时建议使用官网的 LTS 版本。
+
 ## 页面没有出现“释义和解析”
 
 检查：

@@ -22,20 +22,28 @@
 
 基础拆解不依赖 AI。没有配置 API Key 时，网站仍可正常使用。
 
-## 3 分钟运行
+## 第一次本地运行
 
-需要 Node.js 20+ 和 pnpm：
+如果你只是想使用网站，**需要先把这个 GitHub 项目克隆到自己的电脑**，再在项目文件夹里启动它。最适合新手的流程是：
 
-```bash
-pnpm install
-pnpm dev
-```
+1. 安装 [Node.js 20 LTS 或更高版本](https://nodejs.org/)。安装程序一路保持默认选项即可。
+2. 安装 [GitHub Desktop](https://desktop.github.com/)，打开本仓库页面，点击 **Code → Open with GitHub Desktop**，选择本地保存位置并点击 **Clone**。
+3. 在 GitHub Desktop 点击 **Repository → Open in PowerShell**（或在项目文件夹空白处右键选择“在终端中打开”）。
+4. 在打开的终端中依次运行：
 
-打开 [http://localhost:3000](http://localhost:3000)。
+   ```powershell
+   corepack enable
+   pnpm install
+   pnpm dev
+   ```
+
+5. 看到 `Ready` 后，在浏览器打开 [http://localhost:3000](http://localhost:3000)。终端窗口需要保持打开，关闭它网站就会停止。
+
+完整图文说明和常见报错处理见[本地运行与部署指南](docs/deployment.md)。
 
 ## 开启 AI
 
-AI 只在自行部署时启用。推荐使用 DeepSeek：
+AI 只在自行部署时启用。以DeepSeek为例：
 
 ```powershell
 Copy-Item .env.example .env.local
@@ -72,7 +80,7 @@ flowchart LR
 1. Fork 本仓库。
 2. 在 Vercel 导入项目。
 3. 不配置 AI 变量即可运行基础版。
-4. 在 Vercel 环境变量中配置 DeepSeek，即可启用高级解析。
+4. 在 Vercel 环境变量中配置API，即可启用高级解析。
 
 详细文档：
 
