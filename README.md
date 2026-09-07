@@ -1,103 +1,93 @@
-# 歌词拆解 Japanese Lyric Lab
+# Japanese Lyric Lab
 
-面向日语初学者的开源歌词学习工具。输入日语歌词或普通文本后，可获得逐词切分、平假名和罗马音对照；AI 释义与语法解析仅在自行部署并配置 API Key 后启用。
+> 给日语歌词加上逐词切分、假名、罗马音，以及可选的 AI 释义与语法解析。
 
-## 功能
+[![CI](https://github.com/Domii17/Japanese-lyric-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Domii17/Japanese-lyric-lab/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-- Kuromoji 日语形态分析与词性识别
-- Kuroshiro 平假名和 Hepburn 罗马音转换
-- 助词 `は / へ / を` 的实际发音修正
-- 数字读音、常见旧字形和不可见字符兼容
-- TXT 文件导入
-- LRCLIB 歌词搜索与导入
-- 多句选择并导出高清 PNG
-- 可选 DeepSeek 或 OpenAI 释义与语法解析
-- 不设置用户数据库，不保存输入文本和解析结果
+![Japanese Lyric Lab 界面预览](docs/images/demo.png)
 
-## 两种部署方式
+## 它能做什么
 
-| 模式 | 基础拆解 | AI 解析 | API 费用 |
-| --- | --- | --- | --- |
-| 公共基础站 | 可用 | 不配置 | 无 |
-| 自行部署 | 可用 | 配置后可用 | 由部署者自己的 API 账户承担 |
+| 功能 | 是否需要 AI |
+| --- | --- |
+| 日语分词、原形和词性 | 否 |
+| 平假名与罗马音 | 否 |
+| 数字读音与常见异体字处理 | 否 |
+| TXT 文件导入 | 否 |
+| LRCLIB 歌词搜索 | 否 |
+| 逐词释义 | 是 |
+| 整句翻译与语法解析 | 是 |
+| 选择句子导出 PNG | 否 |
 
-未配置服务端 API Key 时，页面不会显示“释义和解析”开关。项目不要求访问者在网页中填写任何密钥。
+基础拆解不依赖 AI。没有配置 API Key 时，网站仍可正常使用。
 
-## 本地运行
+## 3 分钟运行
 
-需要 Node.js 20 或更高版本，以及 pnpm。
+需要 Node.js 20+ 和 pnpm：
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-打开 `http://localhost:3000`。不创建 `.env.local` 也可以使用全部基础功能。
+打开 [http://localhost:3000](http://localhost:3000)。
 
-## 自行配置 AI
+## 开启 AI
 
-复制环境变量示例：
+AI 只在自行部署时启用。推荐使用 DeepSeek：
 
 ```powershell
 Copy-Item .env.example .env.local
 ```
 
-DeepSeek 配置：
-
-```text
-AI_PROVIDER=deepseek
+```env
 AI_FEATURE_ENABLED=true
-DEEPSEEK_API_KEY=你的 DeepSeek API Key
+AI_PROVIDER=deepseek
+DEEPSEEK_API_KEY=你的_API_Key
 DEEPSEEK_MODEL=deepseek-chat
 ```
 
-OpenAI 配置：
+保存后重启 `pnpm dev`，页面会出现“释义和解析”开关。
 
-```text
-AI_PROVIDER=openai
-AI_FEATURE_ENABLED=true
-OPENAI_API_KEY=你的 OpenAI API Key
-OPENAI_MODEL=gpt-5-mini
+> API Key 只在服务端读取，不会发送给浏览器；不要把 `.env.local` 提交到 GitHub。
+
+## 工作方式
+
+```mermaid
+flowchart LR
+    A[输入歌词] --> B[Kuromoji 分词]
+    B --> C[假名与罗马音]
+    C --> D[基础拆解结果]
+    D --> E{开启释义和解析}
+    E -->|否| F[完成]
+    E -->|是| G[DeepSeek / OpenAI]
+    G --> H[逐词释义与整句语法解析]
 ```
 
-修改环境变量后需重新启动开发服务器。API Key 只由服务端路由读取；请勿使用 `NEXT_PUBLIC_` 前缀，也不要提交 `.env.local`。
+## 部署
 
-## 部署到 Vercel
+推荐使用 Vercel：
 
-1. Fork 或导入此 GitHub 仓库。
-2. 在 Vercel 中选择 **Add New Project** 并导入仓库。
-3. 保持框架为 Next.js，使用仓库中的默认构建设置。
-4. 仅部署公共基础站时，不添加任何 AI 环境变量；也可设置 `AI_FEATURE_ENABLED=false` 强制关闭 AI。
-5. 部署个人 AI 版本时，在 Vercel 项目的 **Settings → Environment Variables** 中添加上面的服务端变量。
-6. 可选添加 `REPOSITORY_URL=https://github.com/你的用户名/仓库名`，在未启用 AI 的站点顶部显示源码入口。
-7. 部署后测试 `/api/analyze`、歌词搜索、图片导出和移动端布局。
+1. Fork 本仓库。
+2. 在 Vercel 导入项目。
+3. 不配置 AI 变量即可运行基础版。
+4. 在 Vercel 环境变量中配置 DeepSeek，即可启用高级解析。
 
-真实密钥不应写入 `vercel.json`、README、截图或 Git 提交。Vercel 环境变量修改后需要重新部署才会生效。
+详细文档：
 
-## AI 与隐私边界
+- [AI 配置](docs/ai-configuration.md)
+- [Vercel 部署](docs/deployment.md)
+- [隐私与版权](docs/privacy-and-copyright.md)
+- [常见问题](docs/troubleshooting.md)
 
-- 基础拆解会把输入文本发送到当前部署的 `/api/analyze`，由服务器内的 Kuromoji 处理，不调用大模型。
-- 歌词搜索会把歌名或歌手发送给 iTunes Search API 和 LRCLIB。
-- 只有部署者配置了 AI，并且用户主动点击“全句解析”时，对应单句和词元才会发送给所选 AI 服务。
-- 项目不包含用户 API Key 输入界面，不会把服务端密钥发送到浏览器。
-- 项目当前使用进程内限流，适合个人部署和低流量使用；公开高流量实例应改用 Redis 等共享限流，并设置供应商消费上限。
+## 项目状态
 
-## 歌词与版权
+这是一个面向日语初学者的个人开源项目。歌词由用户输入或第三方服务临时提供，项目不附带完整受版权保护歌词，也不建立用户数据库。
 
-本项目不附带完整的受版权保护歌词，也不建立歌词数据库。歌词由用户输入或从第三方 LRCLIB 临时获取，相关文字、歌曲和录音的权利归各自权利人所有。部署者应提供版权投诉、纠错和下架渠道，并遵守所在地法律及第三方服务条款。
-
-## 技术栈与数据来源
-
-- Next.js、React、TypeScript
-- Kuromoji、Kuroshiro
-- LRCLIB：歌词结果
-- iTunes Search API：模糊歌曲名称发现
-- DeepSeek 或 OpenAI：自行部署后的可选增强
+代码采用 [MIT License](LICENSE)。
 
 ## 贡献与安全
 
-提交改动前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。发现安全问题请参考 [SECURITY.md](SECURITY.md)，不要在公开 Issue 中提交密钥或用户数据。
-
-## 许可证
-
-代码采用 [MIT License](LICENSE)。歌词、歌曲名称、第三方数据和商标不因本项目的代码许可证而改变其原有权利归属。
+- 贡献流程：[CONTRIBUTING.md](CONTRIBUTING.md)
+- 安全问题：[SECURITY.md](SECURITY.md)
