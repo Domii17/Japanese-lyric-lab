@@ -1,0 +1,13 @@
+node_modules/
+.codex/
+.next/
+.next-dev/
+.env*
+!.env.example
+.vercel/
+coverage/
+*.log
+public/dict/
+.DS_Store
+.idea/
+.vscode/

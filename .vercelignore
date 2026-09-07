@@ -1,0 +1,7 @@
+.env*
+!.env.example
+.git/
+.github/
+coverage/
+*.log
+public/dict/
