@@ -1,13 +1,20 @@
 # Japanese Lyric Lab
 
-> 给日语歌词加上逐词切分、假名、罗马音，以及可选的 AI 释义与语法解析。
+> 本工具适合：
+
+- 刚学完五十音，就迫不及待想唱 J-Pop
+- 看到不会读的词会卡住，罗马音也总是跟不上
+- 教学视频看了好几遍，开口还是容易“口胡”
+- 想一边唱歌，一边慢慢认识日语
+
+Japanese Lyric Lab 会为歌词提供逐词切分、假名和罗马音标注；打开「释义和解析」后，还可以查看词义、整句理解和基础语法。
 
 [![CI](https://github.com/Domii17/Japanese-lyric-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Domii17/Japanese-lyric-lab/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ![Japanese Lyric Lab 界面预览](docs/images/demo.png)
 
-## 它能做什么
+## 功能介绍
 
 | 功能 | 是否需要 AI |
 | --- | --- |
@@ -24,7 +31,7 @@
 
 ## 第一次本地运行
 
-如果你只是想使用网站，**需要先把这个 GitHub 项目克隆到自己的电脑**，再在项目文件夹里启动它。最适合新手的流程是：
+如果你只是想使用网站，**需要先把这个 GitHub 项目克隆到自己的电脑**，再在项目文件夹里启动它。流程速览👇：
 
 1. 安装 [Node.js 20 LTS 或更高版本](https://nodejs.org/)。安装程序一路保持默认选项即可。
 2. 安装 [GitHub Desktop](https://desktop.github.com/)，打开本仓库页面，点击 **Code → Open with GitHub Desktop**，选择本地保存位置并点击 **Clone**。
