@@ -27,6 +27,7 @@ export default function Home() {
   const [aiLoading, setAiLoading] = useState<number | null>(null);
   const [aiResults, setAiResults] = useState<Record<number, AiEnhanced>>({});
   const [aiError, setAiError] = useState<Record<number, string>>({});
+  const [collapsedExplanations, setCollapsedExplanations] = useState<Set<number>>(new Set());
   const [track, setTrack] = useState("");
   const [artist, setArtist] = useState("");
   const [searchingLyrics, setSearchingLyrics] = useState(false);
@@ -54,7 +55,7 @@ export default function Home() {
 
   async function runAnalysis() {
     if (!text.trim()) { setLines([]); setMessage("请先输入日语文本"); return; }
-    setIsAnalyzing(true); setMessage("正在加载日语词典"); setSelected(null); setAiResults({}); setAiError({}); setExportMode(false); setSelectedLines(new Set());
+    setIsAnalyzing(true); setMessage("正在加载日语词典"); setSelected(null); setAiResults({}); setAiError({}); setCollapsedExplanations(new Set()); setExportMode(false); setSelectedLines(new Set());
     try {
       const response = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
       if (!response.ok) throw new Error("Analysis request failed");
@@ -82,6 +83,7 @@ export default function Home() {
       const payload = (await response.json()) as AiEnhanced & { error?: string };
       if (!response.ok) throw new Error(payload.error || "AI 请求失败");
       setAiResults((current) => ({ ...current, [lineIndex]: payload }));
+      setCollapsedExplanations((current) => { const next = new Set(current); next.delete(lineIndex); return next; });
     } catch (error) { setAiError((current) => ({ ...current, [lineIndex]: error instanceof Error ? error.message : "AI 讲解失败" })); }
     finally { setAiLoading(null); }
   }
@@ -108,6 +110,14 @@ export default function Home() {
     if (!aiEnabled) return "开启释义和解析后展示";
     if (!aiResults[lineIndex]) return "请先点击全句解析";
     return aiResults[lineIndex].glosses?.[tokenIndex]?.meaning || "暂未返回释义";
+  }
+
+  function toggleExplanation(lineIndex: number) {
+    setCollapsedExplanations((current) => {
+      const next = new Set(current);
+      if (next.has(lineIndex)) next.delete(lineIndex); else next.add(lineIndex);
+      return next;
+    });
   }
 
   function openExportMode() {
@@ -263,12 +273,13 @@ export default function Home() {
         <section className="results-panel" aria-live="polite">
           <div className="section-heading result-title"><div><span className="step">02</span><h2>歌词拆解</h2></div><div className="result-controls"><span>{lines.length ? `${lines.length} 行 · ${tokenCount} 词` : message}</span>{lines.length > 0 && <button className="export-trigger" onClick={openExportMode}><ImageIcon size={14} /> 保存图片</button>}</div></div>
           {exportMode && <div className="export-toolbar"><span>选择要保存的句子</span><button onClick={() => setSelectedLines(selectedLines.size === lines.length ? new Set() : new Set(lines.map((_, index) => index)))}>{selectedLines.size === lines.length ? "取消全选" : "全选"}</button><button className="download-button" onClick={downloadImage} disabled={!selectedLines.size}><ImageIcon size={14} /> 生成 {selectedLines.size ? `${selectedLines.size} 句图片` : "图片"}</button><button className="close-export" onClick={() => setExportMode(false)} title="关闭选择" aria-label="关闭选择"><X size={15} /></button></div>}
-          {!lines.length ? (
-            <div className="empty-state"><span className="empty-mark">あ</span><h3>准备好后开始拆解</h3><p>结果会按原文、假名和罗马音逐词对齐。</p></div>
-          ) : (
-            <div className="line-list">
-              {lines.map((line, lineIndex) => (
-                <article className={`study-line${exportMode ? " export-selecting" : ""}`} key={`${line.original}-${lineIndex}`}>
+          <div className="results-scroll">
+            {!lines.length ? (
+              <div className="empty-state"><span className="empty-mark">あ</span><h3>准备好后开始拆解</h3><p>结果会按原文、假名和罗马音逐词对齐。</p></div>
+            ) : (
+              <div className="line-list">
+                {lines.map((line, lineIndex) => (
+                  <article className={`study-line${exportMode ? " export-selecting" : ""}`} key={`${line.original}-${lineIndex}`}>
                   <div className="line-index">{String(lineIndex + 1).padStart(2, "0")}</div>
                   {exportMode && <label className="line-selector"><input type="checkbox" checked={selectedLines.has(lineIndex)} onChange={() => toggleExportLine(lineIndex)} /><span>选择</span></label>}
                   <div className="original-line" lang="ja">{line.original}</div>
@@ -285,14 +296,16 @@ export default function Home() {
                   })()}
                   {aiEnabled && <div className="line-actions">
                     <button className="ai-button" onClick={() => explainLine(lineIndex)} disabled={aiLoading === lineIndex}><Sparkles size={14} /> {aiLoading === lineIndex ? "解析中" : aiResults[lineIndex] ? "重新解析" : "全句解析"}</button>
+                    {aiResults[lineIndex]?.explanation && <button className="collapse-button" onClick={() => toggleExplanation(lineIndex)}>{collapsedExplanations.has(lineIndex) ? "展开解析" : "收起解析"}</button>}
                     <span>只发送这一句</span>
                   </div>}
                   {aiError[lineIndex] && <div className="ai-error">{aiError[lineIndex]}</div>}
-                  {aiEnabled && aiResults[lineIndex]?.explanation && <AiPanel explanation={aiResults[lineIndex].explanation!} />}
-                </article>
-              ))}
-            </div>
-          )}
+                  {aiEnabled && aiResults[lineIndex]?.explanation && !collapsedExplanations.has(lineIndex) && <AiPanel explanation={aiResults[lineIndex].explanation!} />}
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       </section>
       {exportPreview && <div className="preview-backdrop" role="dialog" aria-modal="true" aria-label="歌词图片预览">
